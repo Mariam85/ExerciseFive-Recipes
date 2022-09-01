@@ -10,7 +10,6 @@ namespace ServerFive.Services
     public class CategoryService : Protos.CategoryService.CategoryServiceBase
     {
         private List<Category> _categories = new();
-        
         public override async Task<Categories> ListCategories(Empty request, ServerCallContext context)
         {
             await ReadCategories();
@@ -85,6 +84,7 @@ namespace ServerFive.Services
             }
             return response;
         }
+        
         public async Task ReadCategories()
         {
             string jsonContent = await File.ReadAllTextAsync("Categories.json");
