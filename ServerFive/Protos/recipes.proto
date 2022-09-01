@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "ServerFive.Protos";
+import "google/protobuf/empty.proto";
+package Recipe;
+
+service RecipeService {
+
+}
+
+message Recipe{
+	string id=1;
+    string title=2;
+    repeated string ingredients=3;
+    repeated string instructions=4;
+    repeated string  categories=5;
+}

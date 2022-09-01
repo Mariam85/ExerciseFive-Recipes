@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "ServerFive.Protos";
+import "google/protobuf/empty.proto";
+package Category;
+
+service CategoryService {
+	rpc ListCategories (google.protobuf.Empty) returns (Categories);
+	rpc AddCategories (Category) returns (Category);
+	rpc RemoveCategories(Category) returns(Category);
+	rpc EditCategories(EditedCategory) returns(Category);
+}
+
+message Category {
+	string id = 1;
+	string name = 2;
+}
+
+message Categories {
+	repeated Category category_item = 1;
+}
+
+message EditedCategory{
+	string old_name=1;
+	string new_name=2;
+}
