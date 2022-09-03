@@ -1,95 +1,22 @@
-﻿using Grpc.Core;
-using ServerFive;
-using Google.Protobuf;
-using ServerFive.Protos;
-using System.Text.Json;
 using Google.Protobuf.WellKnownTypes;
+using Grpc.Core;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using System.Text.Json;
+using ServerFive.Protos;
+using Google.Protobuf;
+using Newtonsoft.Json;
 
 namespace ServerFive.Services
 {
-    public class CategoryService : Protos.CategoryService.CategoryServiceBase
+    public class CategoryService : Category.CategoryBase
     {
-        private List<Category> _categories = new();
-        public override async Task<Categories> ListCategories(Empty request, ServerCallContext context)
-        {
-            await ReadCategories();
-            Categories response = new();
-            response.CategoryItem.AddRange(_categories);
-            return response;
-        }
-
-        public override async Task<Category> AddCategories(Category request, ServerCallContext context)
-        {
-            await ReadCategories();
-            Category response = new();
-            if (_categories.Any())
-            {
-                if (_categories.FindIndex(c => c.Name == request.Name) == -1)
-                {
-                    _categories.Add(request);
-                    _categories.Sort((x, y) => string.Compare(x.Name, y.Name));
-                    await UpdateCategories();
-                    response = request;
-                }
-            }
-            return response;
-        }
-
-        public override async Task<Category> RemoveCategories(Category request, ServerCallContext context)
-        {
-            await ReadCategories();
-            Category response = new();
-            if (_categories.Any())
-            {
-                bool isRemoved = _categories.Remove(_categories.Find(c => c.Name == request.Name));
-                if (!isRemoved)
-                {
-                    // Category does not exist.
-                }
-                else
-                {
-                    await UpdateCategories();
-                    // Removing from the recipes file (TODO).
-                    await ReadRecipes();
-                    bool foundRecipe = false;
-                    response = request;
-                }
-            }
-            return response;
-        }
-
-        public override async Task<Category> EditCategories(EditedCategory request, ServerCallContext context)
-        {
-            Category response = new();
-            if (request.OldName == request.NewName)
-            {
-                return response;
-            }
-
-            // Renaming category in the categories file.
-            await ReadCategories();
-            int index = _categories.FindIndex(c => c.Name == request.OldName);
-            if (index != -1)
-            {
-                if (_categories.FindIndex(c => c.Name == request.NewName) == -1)
-                {
-                    _categories[index].Name = request.NewName;
-                    _categories.Sort((x, y) => string.Compare(x.Name, y.Name));
-                    await UpdateCategories();
-                }
-
-                // Renaming the category in the recipes file (TODO).
-                response.Name = request.NewName;
-                return response;
-            }
-            return response;
-        }
-        
+        private List<CategoryItem> categories = new();
+        private List<RecipeItem> recipes = new();
         public async Task ReadCategories()
         {
             string jsonContent = await File.ReadAllTextAsync("Categories.json");
             if (jsonContent == null) { return; }
-            _categories = JsonSerializer.Deserialize<List<Category>>(jsonContent);
+            categories = JsonConvert.DeserializeObject<List<CategoryItem>>(jsonContent)!;
         }
 
         public async Task UpdateCategories()
@@ -98,15 +25,14 @@ namespace ServerFive.Services
             string sFile = System.IO.Path.Combine(Environment.CurrentDirectory, "Categories.json");
             string sFilePath = Path.GetFullPath(sFile);
             var options = new JsonSerializerOptions { WriteIndented = true };
-            File.WriteAllText(sFilePath, System.Text.Json.JsonSerializer.Serialize(_categories));
+            File.WriteAllText(sFilePath, System.Text.Json.JsonSerializer.Serialize(categories, options));
         }
 
         public async Task ReadRecipes()
         {
             string jsonContent = await File.ReadAllTextAsync("Recipes.json");
             if (jsonContent == null) { return; }
-            Console.WriteLine(jsonContent);
-            //recipes = JsonSerializer.Deserialize<List<>>(jsonContent);
+            recipes = JsonConvert.DeserializeObject<List<RecipeItem>>(jsonContent)!;
         }
 
         public async Task UpdateRecipes()
@@ -115,7 +41,146 @@ namespace ServerFive.Services
             string sFile = System.IO.Path.Combine(Environment.CurrentDirectory, "Recipes.json");
             string sFilePath = Path.GetFullPath(sFile);
             var options = new JsonSerializerOptions { WriteIndented = true };
-            //File.WriteAllText(sFilePath, System.Text.Json.JsonSerializer.Serialize(recipes));
+            File.WriteAllText(sFilePath, System.Text.Json.JsonSerializer.Serialize(recipes, options));
         }
+
+        // Listing categories.
+        public override async Task<Categories> ListCategories(Empty request, ServerCallContext context)
+        {
+            await ReadCategories();
+            Categories response = new();
+            response.SingleCategory.AddRange(categories);
+            return response;
+        }
+
+        // Adding categories.
+        public override async Task<CategoryItem> AddCategories(CategoryItem request, ServerCallContext context)
+        {
+            await ReadCategories();
+            CategoryItem response = request;
+            if (categories.Any())
+            {
+                if (categories.FindIndex(c => c.Name == request.Name) == -1)
+                {
+                    categories.Add(request);
+                    categories.Sort((x, y) => string.Compare(x.Name, y.Name));
+                    await UpdateCategories();
+                    return response;
+                }
+                else
+                {
+                    throw new RpcException(new Status(StatusCode.PermissionDenied, "This category already exists."));
+                }
+            }
+            else
+            {
+                categories.Add(request);
+                await UpdateCategories();
+                return response;
+            }
+        }
+
+        // Remove categories.
+        public override async Task<CategoryItem> RemoveCategories(CategoryItem request, ServerCallContext context)
+        {
+            await ReadCategories();
+            CategoryItem response = request;
+            if (categories.Any())
+            {
+                bool isRemoved = categories.Remove(categories.Find(c => c.Name == request.Name));
+                if (!isRemoved)
+                {
+                    throw new RpcException(new Status(StatusCode.PermissionDenied, "This category does not exist."));
+                }
+                else
+                { 
+                    await UpdateCategories();
+                    // Removing from the recipes file.
+                    await ReadRecipes();
+                    bool foundRecipe = false;
+                    foreach (RecipeItem r in recipes)
+                    {
+                        if (r.Categories[0] == request.Name && r.Categories.Count == 1)
+                        {
+                            foundRecipe = true;
+                            recipes.Remove(r);
+                        }
+                        else
+                        {
+                            if (r.Categories.Contains(request.Name))
+                            {
+                                foundRecipe = true;
+                                r.Categories.Remove(request.Name);
+                            }
+                        }
+                    }
+                    if (foundRecipe)
+                    {
+                        UpdateRecipes();
+                    }
+                    return request;
+                }
+            }
+            else
+            {
+                throw new RpcException(new Status(StatusCode.PermissionDenied, "There are no categories."));
+            }
+        }
+
+        // Edit categories.
+        public override async Task<CategoryItem> EditCategories(EditedCategory request, ServerCallContext context)
+        {
+            if (request.OldName == request.NewName)
+            {
+                throw new RpcException(new Status(StatusCode.PermissionDenied, "There is no change in the category value."));
+            }
+            else
+            {
+                // Renaming category in the categories file.
+                await ReadCategories();
+                int index = categories.FindIndex(c => c.Name == request.OldName);
+                if (index != -1)
+                {
+                    if (categories.FindIndex(c => c.Name == request.NewName) == -1)
+                    {
+                        categories[index].Name = request.NewName;
+                        categories.Sort((x, y) => string.Compare(x.Name, y.Name));
+                        await UpdateCategories();
+
+                        // Renaming the category in the recipes file.
+                        await ReadRecipes();
+                        List<RecipeItem> beforeRename = recipes.FindAll(r => r.Categories.Contains(request.OldName));
+                        if (beforeRename.Count != 0)
+                        {
+                            foreach (RecipeItem r in beforeRename)
+                            {
+                                int i = r.Categories.IndexOf(request.OldName);
+                                if (i != -1)
+                                {
+                                    r.Categories[i] = request.NewName;
+                                    r.Categories.OrderBy(c => c);
+                                }
+                            }
+                            UpdateRecipes();
+                        }
+                        CategoryItem response = new();
+                        response.Name = request.NewName;
+                        response.Id = categories[index].Id;
+                        return response;
+                    }
+                    else
+                    {
+                        throw new RpcException(new Status(StatusCode.PermissionDenied, "The new category name already exists."));
+                    }
+                }
+                else
+                {
+                    throw new RpcException(new Status(StatusCode.PermissionDenied, "The old category name does not exist."));
+                }
+
+            }
+        }
+
     }
 }
+
