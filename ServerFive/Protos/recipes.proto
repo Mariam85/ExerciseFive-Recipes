@@ -1,17 +1,24 @@
 syntax = "proto3";
 
+package recipe;
 option csharp_namespace = "ServerFive.Protos";
 import "google/protobuf/empty.proto";
-package Recipe;
 
-service RecipeService {
-
+service Recipe{
+	rpc ListRecipes (google.protobuf.Empty) returns (RecipesList);
+	rpc AddRecipe (RecipeItem) returns (RecipeItem);
+	rpc EditRecipe(RecipeItem) returns(RecipeItem);
+	rpc RemoveRecipe(RecipeItem) returns(RecipeItem);
 }
 
-message Recipe{
-	string id=1;
-    string title=2;
-    repeated string ingredients=3;
-    repeated string instructions=4;
-    repeated string  categories=5;
+message RecipeItem {
+	string id = 1;
+	string title = 2;
+	repeated string ingredients = 3;
+	repeated string instructions = 4;
+	repeated string categories = 5;
+}
+
+message RecipesList {
+	repeated RecipeItem single_recipe = 1;
 }
