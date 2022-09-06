@@ -1,0 +1,210 @@
+@page
+@model RecipeRazor.Pages.CategoriesPageModel
+@{
+    ViewData["Title"] = "Categories";
+}
+<style>
+    body {
+        background: no-repeat;
+        background-size: cover;
+        height: 960px;
+    }
+</style>
+
+<script type="text/javascript">
+    function update(el) {
+        $('input[name=oldValue]').val(($(el).closest('tr').index()).toString());
+    }
+    function remove(el) {
+        $('input[name=deletedValue]').val(($(el).closest('tr').index()).toString());
+    }
+</script>
+
+<script type="text/javascript">
+    const imgs = [];
+    imgs[0] = 'https://images.unsplash.com/photo-1632431455870-65dd9cf75e0e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1332&q=80';
+    imgs[1] = 'https://images.unsplash.com/photo-1632436638809-f89272c90f64?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1332&q=80';
+    imgs[2] = 'https://images.unsplash.com/photo-1633378217782-cbee9b307853?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1332&q=80';
+    imgs[3] = 'https://images.unsplash.com/photo-1495195129352-aeb325a55b65?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1176&q=80';
+    imgs[4] = 'https://images.unsplash.com/photo-1495195134817-aeb325a55b65?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1776&q=80';
+    imgs[5] = 'https://images.unsplash.com/photo-1619367302084-3d07eb49159f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1171&q=80';
+
+    window.onload = function () {
+        const random = Math.floor(Math.random() * imgs.length);
+        document.body.style.backgroundImage = `url(${imgs[random]})`;
+    }
+</script>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if (@Model.msg.Any())
+{
+    @foreach (var msg in Model.msg)
+    {
+        @if (msg == "error1")
+        {
+            <script type="text/javascript">
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed to edit category...',
+                    confirmButtonColor: '#198754'
+                })
+            </script>
+        }
+        @if (msg == "no error1")
+        {
+            <script type="text/javascript">
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Successfully edited!',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#198754'
+                });
+            </script>
+        }
+        @if (msg == "no error2")
+        {
+            <script type="text/javascript">
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Successfully added!',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#198754'
+                });
+            </script>
+        }
+        @if (msg == "error2")
+        {
+            <script type="text/javascript">
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed to add category...',
+                    confirmButtonColor: '#198754'
+                })
+            </script>
+        }
+    }
+}
+<script type="text/javascript">
+    function myfunction() {
+        Swal.fire({
+            title: 'Are you sure you want to delete this category?',
+            showDenyButton: true,
+            confirmButtonText: 'Yes',
+            confirmButtonColor: '#198754',
+            denyButtonText: `No`,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById("updateButton").click();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Successfully deleted!',
+                    showConfirmButton: false,
+                });
+            }
+            else if (result.isDenied) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'No changes are applied',
+                    showConfirmButton: false,
+                });
+            }
+        })
+    }
+</script>
+
+<body>
+    <div class="display-2 font-weight-bold mb-3">
+        <a data-bs-toggle="modal" data-bs-target="#exampleTwoModal" style="cursor: pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+        </svg>
+        </a>
+        Categories
+    </div>
+    <br>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="update">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabelf">Edit category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="oldValue" />
+                        <label for="edited">Category</label> &nbsp
+                        <input type="text" name="newCategory" placeholder="enter the new value.." id="edited" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button data-bs-dismiss="modal" type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="exampleTwoModal" tabindex="-1" aria-labelledby="exampleTwoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="add">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabelf">Add category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="oldValue" />
+                        <label for="edited">Category</label> &nbsp
+                        <input type="text" name="addCategoryName" placeholder="enter the category name.." id="added" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button data-bs-dismiss="modal" type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div style="width:700px;height:600px;overflow-y:auto">
+        <table id="add_table" class=" bg-light table" data-toggle="table" data-mobile-responsive="true">
+            <thead>
+                <tr>
+                    <th>Categories</th>
+                    <th>Rename</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in Model.categories)
+                {
+                    <tr>
+                        <td>
+                            <label name="oldCategory" readonly="readonly" type="text" value="@category.Name" id="original">@category.Name</label>
+                        </td>
+                        <td>
+                            <button type="button" onclick="update(this)" class="btn  btn btn-success add" id="btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" />
+                                </svg>
+                            </button>
+                        </td>
+                        <td>
+                            <form method="post" asp-page-handler="delete">
+                                <button type="button" class="btn  btn btn-danger delete_row" name="isWorking" onclick="myfunction();remove(this)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+                                    </svg>
+                                </button>
+                                <button type="submit" id="updateButton" hidden></button>
+                                <input type="hidden" name="deletedValue" />
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+</body>

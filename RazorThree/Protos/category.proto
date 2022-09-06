@@ -1,0 +1,26 @@
+﻿syntax = "proto3";
+
+package category;
+option csharp_namespace = "RazorThree.Protos";
+import "google/protobuf/empty.proto"; 
+
+service Category {
+	rpc ListCategories (google.protobuf.Empty) returns (Categories);
+	rpc AddCategories (CategoryItem) returns (CategoryItem);
+	rpc RemoveCategories(CategoryItem) returns(CategoryItem);
+	rpc EditCategories(EditedCategory) returns(CategoryItem);
+}
+
+message CategoryItem {
+	string id = 1;
+	string name = 2;
+}
+
+message Categories {
+	repeated CategoryItem single_category = 1;
+}
+
+message EditedCategory{
+	string old_name=1;
+	string new_name=2;
+}
