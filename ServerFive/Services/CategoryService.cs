@@ -1,12 +1,12 @@
-using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System.Text.Json;
-using ServerFive.Protos;
+using GrpcService1.Protos;
 using Google.Protobuf;
 using Newtonsoft.Json;
 
-namespace ServerFive.Services
+namespace GrpcService1.Services
 {
     public class CategoryService : Category.CategoryBase
     {
@@ -93,7 +93,7 @@ namespace ServerFive.Services
                     throw new RpcException(new Status(StatusCode.PermissionDenied, "This category does not exist."));
                 }
                 else
-                { 
+                {
                     await UpdateCategories();
                     // Removing from the recipes file.
                     await ReadRecipes();
@@ -130,7 +130,11 @@ namespace ServerFive.Services
         // Edit categories.
         public override async Task<CategoryItem> EditCategories(EditedCategory request, ServerCallContext context)
         {
-            if (request.OldName == request.NewName)
+            if (request == null || request.OldName.Length == 0 || request.NewName.Length == 0)
+            {
+                throw new RpcException(new Status(StatusCode.PermissionDenied, "Empty parameters were given."));
+            }
+            else if (request.OldName == request.NewName)
             {
                 throw new RpcException(new Status(StatusCode.PermissionDenied, "There is no change in the category value."));
             }
@@ -170,7 +174,7 @@ namespace ServerFive.Services
                     }
                     else
                     {
-                        throw new RpcException(new Status(StatusCode.PermissionDenied, "The new category name already exists."));
+                        throw new RpcException(new Status(StatusCode.PermissionDenied, "The category name entered already exists."));
                     }
                 }
                 else
