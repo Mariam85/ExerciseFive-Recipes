@@ -16,13 +16,37 @@
         document.body.style.backgroundImage = `url(${imgs[random]})`;
     }
 </script>
-<body style="background: url('https://images.unsplash.com/photo-1614548539644-ef528186523a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80');
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<body style="
       height: auto;
       background-repeat: no-repeat;
       background-size: cover;
       padding-right:inherit;
       overflow-x:hidden;
       ">
+    <div div class=" modal fade" id="@("d"+Model.singleRecipe.Id)" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success" id="exampleModalLabel">Delete Recipe</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" asp-page-handler="delete">
+                    <div class="modal-body">
+                        <div>
+                            <input value="@Model.singleRecipe.Id" name="recipeToDelete" type="hidden" />
+                            <label>Are you sure you want to delete this recipe?</label>
+                            <br />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button data-bs-dismiss="modal" type="submit" class="btn btn-primary">Yes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="@("l"+Model.singleRecipe.Id)" tabindex="-1" aria-labelledby="exampleTwoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
@@ -85,7 +109,8 @@
                         @foreach (var category in Model.categ)
                         {
                             <div class="form-check form-switch text-start">
-                                <input name="categories" value="@category.Name" type="checkbox" id="@("flex" + @pp)" @if (Model.singleRecipe.Categories.Contains(category.Name)) { <text> checked</text>
+                                <input name="categories" value="@category.Name" type="checkbox" id="@("flex" + @pp)" @if (Model.singleRecipe.Categories.Contains(category.Name)) {
+                            <text> checked</text>
                             }>
                                 <label class="form-check-label" for="@("flex" + @pp++)">@category.Name</label>
                             </div>
@@ -101,7 +126,7 @@
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form method="post">
+                <form method="post" asp-page-handler="add">
                     <div class="modal-header">
                         <h5 class="modal-title text-success" id="exampleModalLabel">Create your own recipe</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -110,19 +135,19 @@
                         <div class="mb-3">
                             <label style="width : 100%; " class="col-form-label col-2 fw-bold " for="createRecipeTitle">Title</label>
                             <div class="col-7">
-                                <input id="createRecipeTitle" x-model="newRecipe.title" class=" form-control h-100" placeholder="Enter the title..." />
+                                <input id="createRecipeTitle" asp-for="newRecipe.Title" class=" form-control h-100" placeholder="Enter the title..." />
                             </div>
                         </div>
                         <div class="my-3 row ">
                             <label style="width : 100%; " class="col-form-label col-2 fw-bold " for="createRecipeIngredients">Ingredients</label>
                             <div class="col-7">
-                                <textarea class="border form-control" style="width: 470px;" asp-for="newRecipe.Ingredients" placeholder="Enter a dash before each ingredient..." id="ingredients" rows="3"></textarea>
+                                <textarea class="border form-control" style="width: 470px;" name="recipeIngredients" placeholder="Place '• ' before each ingredient..." id="ingredients" rows="3"></textarea>
                             </div>
                         </div>
                         <div class="my-3 row">
                             <label style="width :100%; " class="col-form-label col-2 fw-bold " for="createRecipeIngredients">Instructions</label>
                             <div class="col-7">
-                                <textarea class="border form-control" style="width: 470px;" asp-for="newRecipe.Instructions" placeholder="Enter a dash before each instruction..." id="instructions" rows="3"></textarea>
+                                <textarea class="border form-control" style="width: 470px;" name="recipeInstructions" placeholder="Place '• ' before each instruction..." id="instructions" rows="3"></textarea>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -158,18 +183,12 @@
     <div id="carouselExampleIndicators" class="carousel slide container" data-interval="false" style="
   width:640px;
   height:360px;background-color: transparent;outline-color:transparent;outline:none;">
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-        </div>
         <div class="carousel-inner">
             <div class="carousel-item active">
                 <button class="border-0" style="background-color:#d4e6da;" data-bs-toggle="modal" data-bs-target="#@("k"+Model.singleRecipe.Id)">
                     <img src="https://cdn.crispedge.com/d4e6d9.png" class="d-block w-100" alt="...">
                     <div class="card-img-overlay display-6 font-weight-bold mb-3 text-center" style="top:30%;">
                         @Model.singleRecipe.Title
-
                         <div style="font-size:20px;align-content:center;">
                             @foreach (var categoryItem in Model.singleRecipe.Categories)
                             {
@@ -183,7 +202,7 @@
                                 <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" />
                             </svg>
                         </a>
-                        <a class="btn btn-danger" data-bs-toggle="modal" :data-bs-target="'#deleteModal' + recipe.id">
+                        <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#@("d"+Model.singleRecipe.Id)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                                 <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
                                 <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
@@ -260,7 +279,7 @@
                                     <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" />
                                 </svg>
                             </a>
-                            <a class="btn btn-danger" data-bs-toggle="modal" :data-bs-target="'#deleteModal' + recipe.id">
+                            <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#@("d"+recipe.Id)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                                     <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
                                     <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
@@ -301,7 +320,8 @@
                                                     }
                                                     @("• " + @ing)
                                                 }
-                                        </textarea>
+                                                        ""
+                                                                </textarea>
                                         </div>
                                         <div class="mb-3">
                                             <label for="floatingTextarea3" class="fw-bold col-form-label">Instructions</label>
@@ -321,7 +341,7 @@
                                                     }
                                                     @("• " + @ins)
                                                 }
-                                        </textarea>
+                                                                </textarea>
                                         </div>
                                         <label class="fw-bold">Categories</label><br>
                                         @{
@@ -330,8 +350,9 @@
                                         @foreach (var category in Model.categ)
                                         {
                                             <div class="form-check form-switch text-start">
-                                                <input name="categories" value="@category.Name" type="checkbox" id="@("flex" + @ppTwo)" @if (recipe.Categories.Contains(category.Name)) { <text> checked</text>
-}>
+                                                <input name="categories" value="@category.Name" type="checkbox" id="@("flex" + @ppTwo)" @if (recipe.Categories.Contains(category.Name)) {
+                                        <text> checked</text>
+                                        }>
                                                 <label class="form-check-label" for="@("flex" + @ppTwo++)">@category.Name</label>
                                             </div>
                                         }
@@ -392,6 +413,29 @@
                         </div>
                     </div>
                 </div>
+                <div div class=" modal fade" id="@("d"+recipe.Id)" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title text-success" id="exampleModalLabel">Delete Recipe</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form method="post" asp-page-handler="delete">
+                                <div class="modal-body">
+                                    <div>
+                                        <input value="@recipe.Id" name="recipeToDelete" type="hidden" />
+                                        <label>Are you sure you want to delete this recipe?</label>
+                                        <br />
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button data-bs-dismiss="modal" type="submit" class="btn btn-primary">Yes</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             }
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev" data-bs-interval="false">
@@ -404,3 +448,21 @@
         </button>
     </div>
 </body>
+<script>
+    if (`@TempData["confirmation"]` == "success") {
+        Swal.fire({
+            title: 'Success!',
+            text: `@TempData["details"]`,
+            icon: 'success',
+            confirmButtonColor: '#198754'
+        });
+    }
+    else if (`@TempData["details"]` == "Empty parameters.") {
+        Swal.fire({
+            icon: 'error',
+            title: 'Not all of the parameters are given...',
+            text: `please fill out all the text boxs`,
+            confirmButtonColor: '#198754'
+        })
+    }
+</script>
