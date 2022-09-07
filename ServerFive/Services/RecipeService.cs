@@ -2,12 +2,12 @@
 using Grpc.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System.Text.Json;
-using GrpcService1.Protos;
+using ServerFive.Protos;
 using Google.Protobuf;
 using Newtonsoft.Json;
 using System.Runtime.CompilerServices;
 
-namespace GrpcService1.Services
+namespace ServerFive.Services
 {
     public class RecipeService : Recipe.RecipeBase
     {
