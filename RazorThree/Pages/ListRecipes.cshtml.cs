@@ -17,8 +17,8 @@ namespace RazorThree.Pages
         public RecipeItem newRecipe { get; set; } = new RecipeItem();
         public List<RecipeItem> recipesList { get; set; } = new List<RecipeItem>();
         public RecipeItem singleRecipe { get; set; } = new RecipeItem();
-
-        public List<CategoryItem> categ { get; set; }
+        public List<CategoryItem> categ { get; set; } = new();
+        public int assignedCategories = new();
         private readonly Recipe.RecipeClient _recipeServiceClient;
         private readonly Category.CategoryClient _categoryServiceClient;
 
@@ -40,12 +40,16 @@ namespace RazorThree.Pages
             }
             var categoriesGroup = await _categoryServiceClient.ListCategoriesAsync(new());
             categ = categoriesGroup.SingleCategory.ToList();
+            assignedCategories = 0;
+            for (int i = 0; i < recipesList.Count; i++)
+            {
+                assignedCategories += recipesList[i].Categories.Count;
+            }
         }
 
         // Adding a recipe.
         public async Task<IActionResult> OnPostAdd(List<string> data, string recipeIngredients, string recipeInstructions)
         {
-
             if (newRecipe.Title.Trim().Length == 0 || recipeInstructions == null || recipeIngredients == null || data.Count == 0)
             {
                 TempData["confirmation"] = "fail";
@@ -80,7 +84,7 @@ namespace RazorThree.Pages
                     }
                 }
             }
-            return RedirectToPage("./ListRecipes");
+            return RedirectToPage("ListRecipes");
         }
 
         // Deleting a recipe.
@@ -112,8 +116,9 @@ namespace RazorThree.Pages
         }
 
         // Editing a recipe.
-        public async Task<IActionResult> OnPostUpdate(string id, string instructions, List<string> categories, string ingredients, string newTitle)
+        public async Task<IActionResult> OnPostUpdate(string recipeId, string instructions, string ingredients, string newTitle, List<string> categoriesFirst, List<string> categories)
         {
+            var categoriesFinal = categories.Count == 0 ? categoriesFirst : categories;
             var ingredientesList = ingredients.Replace("\n", "").Replace("\r", "").Split("• ").ToList();
             ingredientesList.RemoveAt(0);
             var instructionsList = instructions.Replace("\n", "").Replace("\r", "").Split("• ").ToList();
@@ -121,9 +126,9 @@ namespace RazorThree.Pages
             RecipeItem recipeToEdit = new();
             recipeToEdit.Ingredients.AddRange(ingredientesList);
             recipeToEdit.Instructions.AddRange(instructionsList);
-            recipeToEdit.Id = id;
+            recipeToEdit.Id = recipeId;
             recipeToEdit.Title = newTitle;
-            recipeToEdit.Categories.AddRange(categories);
+            recipeToEdit.Categories.AddRange(categoriesFinal);
             try
             {
                 var r = await _recipeServiceClient.EditRecipeAsync(recipeToEdit);

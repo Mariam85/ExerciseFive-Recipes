@@ -46,7 +46,7 @@ namespace RecipeRazor.Pages
                     categories = categoriesGroup.SingleCategory.ToList();
                     var index = categories.FindIndex(c => c.Name == categoryToDelete);
                     var c = await _categoryServiceClient.RemoveCategoriesAsync(categories[index]);
-                    TempData["details"] = categoryToDelete+" is deleted!";
+                    TempData["details"] = categoryToDelete + " is deleted!";
                     TempData["confirmation"] = "success";
 
                 }

@@ -1,6 +1,7 @@
 ﻿@page
 @model RazorThree.Pages.ListRecipesModel
 @{
+    ViewData["Title"] = "Recipes";
 }
 <script type="text/javascript">
     const imgs = [];
@@ -52,19 +53,19 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title text-success" id="exampleModalLabel">Edit recipe</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="location.reload();"></button>
                 </div>
-                <form method="post" asp-page-handler="update">
+                <form method="post" asp-page-handler="update" onsubmit="return checkEditFirst();" id="firstEditform">
                     <div class="modal-body" style="max-height: 500px;overflow-y: scroll;">
                         <div class="mb-3">
                             <label for="newTitle" class="fw-bold col-form-label ">Title</label>
                             <div contentEditable="true">
-                                <input class="border-0 " value="@Model.singleRecipe.Title" name="newTitle" />
+                                <input class="border-0 " value="@Model.singleRecipe.Title" name="newTitle" id="editTitle" required />
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="floatingTextarea2" class="fw-bold col-form-label">Ingredients</label>
-                            <textarea class=" form-control h-100" name="ingredients" rows="@(Model.singleRecipe.Ingredients.Count)" id="floatingTextarea2">
+                            <textarea class=" form-control h-100" name="ingredients" rows="@(Model.singleRecipe.Ingredients.Count)" id="floatingTextarea2" required>
                                 @{
                                     int p = 0;
                                 }
@@ -84,7 +85,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="floatingTextarea3" class="fw-bold col-form-label">Instructions</label>
-                            <textarea height="400" class=" form-control " name="instructions" rows="@(Model.singleRecipe.Instructions.Count +5)" id="floatingTextarea3">
+                            <textarea height="400" class=" form-control " name="instructions" rows="@(Model.singleRecipe.Instructions.Count +5)" id="floatingTextarea3" required>
                                 @{
                                     int o = 0;
                                 }
@@ -109,24 +110,26 @@
                         @foreach (var category in Model.categ)
                         {
                             <div class="form-check form-switch text-start">
-                                <input name="categories" value="@category.Name" type="checkbox" id="@("flex" + @pp)" @if (Model.singleRecipe.Categories.Contains(category.Name)) {
+                                <input name="categoriesFirst" value="@category.Name" type="checkbox" id="@("flex" + @pp)" @if (Model.singleRecipe.Categories.Contains(category.Name)) {
                             <text> checked</text>
                             }>
-                                <label class="form-check-label" for="@("flex" + @pp++)">@category.Name</label>
+                                <label style="pointer-events: none;" class="form-check-label" for="@("flex" + @pp++)">@category.Name</label>
                             </div>
                         }
+                        <input name="recipeId" value="@Model.singleRecipe.Id.ToString()" hidden />
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" name="id" value="@Model.singleRecipe.Id" class="btn btn-primary" data-bs-dismiss="modal">Edit</button>
+                        <button type="submit" name="id" value="@Model.singleRecipe.Id.ToString()" class="btn btn-primary">Edit</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form method="post" asp-page-handler="add">
+                <form method="post" asp-page-handler="add" onsubmit="event.preventDefault();" id="Addform">
                     <div class="modal-header">
                         <h5 class="modal-title text-success" id="exampleModalLabel">Create your own recipe</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -157,19 +160,19 @@
                             @foreach (var c in Model.categ)
                             {
                                 <input type="checkbox" id="title" name="data" value="@c.Name">
-                                <label for="title">@c.Name</label>
+                                <label style="pointer-events: none;" for="title">@c.Name</label>
                                 <br>
                             }
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" id="button" class="btn btn-primary">Save</button>
+                        <button type="submit" id="checkBtn" class="btn btn-primary" onclick="checkAdd()">Save</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
     <div class="display-2 font-weight-bold mb-3">
         <a style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#exampleModal">
             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
@@ -261,6 +264,7 @@
             </div>
             @foreach (var recipe in Model.recipesList)
             {
+                <tr></tr>
                 <div class="carousel-item">
                     <button class="border-0" style="background-color:#d4e6da;" data-bs-toggle="modal" data-bs-target="#@("m"+recipe.Id)">
                         <img src="https://cdn.crispedge.com/d4e6d9.png" class="d-block w-100" alt="...">
@@ -292,19 +296,19 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title text-success" id="exampleModalLabel">Edit recipe</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="location.reload()"></button>
                                 </div>
-                                <form method="post" asp-page-handler="update">
+                                <form method="post" asp-page-handler="update" onsubmit="return checkEdit(@recipe.Categories.Count.ToString());">
                                     <div class="modal-body" style="max-height: 500px;overflow-y: scroll;">
                                         <div class="mb-3">
                                             <label for="newTitle" class="fw-bold col-form-label ">Title</label>
                                             <div contentEditable="true">
-                                                <input class="border-0 " value="@recipe.Title" name="newTitle" />
+                                                <input class="border-0 " value="@recipe.Title" name="newTitle" id="editTitleTwo" required />
                                             </div>
                                         </div>
                                         <div class="mb-3">
                                             <label for="floatingTextarea2" class="fw-bold col-form-label">Ingredients</label>
-                                            <textarea class=" form-control h-100" name="ingredients" rows="@(recipe.Ingredients.Count)" id="floatingTextarea2">
+                                            <textarea class=" form-control h-100" name="ingredients" rows="@(recipe.Ingredients.Count)" id="floatingTextarea22" required>
                                                 @{
                                                     int pTwo = 0;
                                                 }
@@ -320,12 +324,11 @@
                                                     }
                                                     @("• " + @ing)
                                                 }
-                                                        ""
-                                                                </textarea>
+                                                                        </textarea>
                                         </div>
                                         <div class="mb-3">
                                             <label for="floatingTextarea3" class="fw-bold col-form-label">Instructions</label>
-                                            <textarea height="400" class=" form-control " name="instructions" rows="@(recipe.Instructions.Count +5)" id="floatingTextarea3">
+                                            <textarea height="400" class=" form-control " name="instructions" rows="@(recipe.Instructions.Count +5)" id="floatingTextarea32" required>
                                                 @{
                                                     int oTwo = 0;
                                                 }
@@ -341,7 +344,7 @@
                                                     }
                                                     @("• " + @ins)
                                                 }
-                                                                </textarea>
+                                                                        </textarea>
                                         </div>
                                         <label class="fw-bold">Categories</label><br>
                                         @{
@@ -350,15 +353,16 @@
                                         @foreach (var category in Model.categ)
                                         {
                                             <div class="form-check form-switch text-start">
-                                                <input name="categories" value="@category.Name" type="checkbox" id="@("flex" + @ppTwo)" @if (recipe.Categories.Contains(category.Name)) {
+                                                <input class="exampleClass" name="categories" value="@category.Name" type="checkbox" id="@("flex" + @ppTwo)" @if (recipe.Categories.Contains(category.Name)) {
                                         <text> checked</text>
                                         }>
-                                                <label class="form-check-label" for="@("flex" + @ppTwo++)">@category.Name</label>
+                                                <label style="pointer-events: none;" class="form-check-label" for="@("flex" + @ppTwo++)">@category.Name</label>
                                             </div>
                                         }
+                                        <input name="recipeId" value="@recipe.Id.ToString()" id="leid" hidden />
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="submit" name="id" value="@recipe.Id" class="btn btn-primary" data-bs-dismiss="modal">Edit</button>
+                                        <button type="submit" id="editRecipeBtn" value="@recipe.Id.ToString()" class="btn btn-primary">Edit</button>
                                     </div>
                                 </form>
                             </div>
@@ -449,6 +453,60 @@
     </div>
 </body>
 <script>
+    function checkAdd() {
+        var isChecked = $("input[type=checkbox][name=data]").is(":checked");
+        var title = document.getElementById('createRecipeTitle').value;
+        var ingredients = document.getElementById('ingredients').value;
+        var instructions = document.getElementById('instructions').value;
+        if (!title || !ingredients || !instructions || !isChecked) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Not all of the parameters are given...',
+                text: `please fill out all the text boxs`,
+                confirmButtonColor: '#198754'
+            })
+        }
+        else {
+            document.getElementById("Addform").submit();
+        }
+    }
+    function checkEditFirst() {
+        var isChecked = $("input[type=checkbox][name=categoriesFirst]").is(":checked");
+        if (!isChecked) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No categories are selected...',
+                text: `please check at least one box`,
+                confirmButtonColor: '#198754'
+            })
+            return false;
+        }
+        else {
+            return true;
+
+        }
+    }
+    function checkEdit(oldCategoriesCount) {
+        var m = document.getElementById('editRecipeBtn').value;
+        var countThree = @Model.assignedCategories;
+        var mm = ".exampleClass:checked"
+        const checked_gems = document.querySelectorAll(mm);
+        const result = [...checked_gems].map(elem => elem.value).join(';');
+        resultsCount = result.split(';').length;
+
+        if (resultsCount == countThree - oldCategoriesCount) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No categories are selected...',
+                text: `please check at least one box`,
+                confirmButtonColor: '#198754'
+            })
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
     if (`@TempData["confirmation"]` == "success") {
         Swal.fire({
             title: 'Success!',

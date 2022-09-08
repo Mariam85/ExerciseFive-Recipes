@@ -1,0 +1,61 @@
+﻿@page
+@model RazorThree.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+<head>
+    <style>
+        .button {
+            display: inline-block;
+            border-radius: 4px;
+            background-color: #e7e7e7;
+            color: black;
+            border: none;
+            color: black;
+            text-align: center;
+            font-size: 28px;
+            padding: 20px;
+            width: 200px;
+            transition: all 0.5s;
+            cursor: pointer;
+            margin: 5px;
+        }
+            .button span {
+                cursor: pointer;
+                display: inline-block;
+                position: relative;
+                transition: 0.5s;
+            }
+                .button span:after {
+                    content: '\00bb';
+                    position: absolute;
+                    opacity: 0;
+                    top: 0;
+                    right: -20px;
+                    transition: 0.5s;
+                }
+            .button:hover span {
+                padding-right: 25px;
+                color: cornflowerblue;
+            }
+                .button:hover span:after {
+                    opacity: 1;
+                    right: 0;
+                }
+    </style>
+</head>
+<body style="size: 1040px; height: 960px; background: url('https://images.unsplash.com/photo-1495195134817-aeb325a55b65?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1776&q=80') no-repeat; background-size: cover ">
+</body>
+<div class="text-center">
+    <br />
+    <br />
+    <br />
+    <br />
+    <h1 class="display-2 font-weight-bold">Welcome to <span class="text-primary">Simple Recipes</span></h1>
+    <h6 class="text-size-16 text-weight-400 lh-copy text-align-center text-medium mb40">
+        Search for, add, and edit recipes and modify categories
+    </h6>
+    <br /><br />
+    <a class="button" asp-page="/ListRecipes" asp-area="" style="margin-right: 15px;"><span>Recipes </span></a>
+    <a class="button" asp-page="/CategoriesPage" asp-area=""><span>Categories </span> </a>
+</div>

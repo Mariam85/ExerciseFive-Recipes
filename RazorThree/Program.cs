@@ -11,28 +11,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
-// Build a config object, using env vars and JSON providers.
-IConfiguration config = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .AddEnvironmentVariables()
-    .Build();
-
-var url = config.GetRequiredSection("url").Get<string>();
-
-builder.Services.AddGrpcClient<Recipe.RecipeClient>(client =>
+builder.Services.AddGrpcClient<Recipe.RecipeClient>(o =>
 {
-    client.Address = new Uri(url);
+    o.Address = new Uri(builder.Configuration["url"]);
 }).ConfigurePrimaryHttpMessageHandler(
         () => new GrpcWebHandler(new HttpClientHandler()));
 
-
-builder.Services.AddGrpcClient<Category.CategoryClient>(client =>
+builder.Services.AddGrpcClient<Category.CategoryClient>(o =>
 {
-    client.Address = new Uri(url);
+    o.Address = new Uri(builder.Configuration["url"]);
 }).ConfigurePrimaryHttpMessageHandler(
         () => new GrpcWebHandler(new HttpClientHandler()));
 
-// Get values from the config given their key and add it to base address of the client
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
