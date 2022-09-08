@@ -18,13 +18,12 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
 
 var app = builder.Build();
 
-app.UseRouting();
-app.UseGrpcWeb();
+app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 app.UseCors();
 
 // Configure the HTTP request pipeline.
-app.MapGrpcService<RecipeService>().EnableGrpcWeb().EnableGrpcWeb().RequireCors("AllowAll");
-app.MapGrpcService<CategoryService>().EnableGrpcWeb().EnableGrpcWeb().RequireCors("AllowAll");
+app.MapGrpcService<RecipeService>().EnableGrpcWeb().RequireCors("AllowAll");
+app.MapGrpcService<CategoryService>().EnableGrpcWeb().RequireCors("AllowAll");
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 app.Run();
